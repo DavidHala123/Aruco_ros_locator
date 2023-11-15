@@ -15,9 +15,9 @@ This project is based on aruco_ros library by pal-robotics (version humble-devel
 Please make sure that camera input broadcasts data to '/image_raw' topic and camera calibration information to '/camera_info' topic
 
 ## How to use
-1. ros2 run rviz2 rviz2
-2. ros2 run diplmova_prace tf_broadcast.py (broadcasts static marker, body and camera positions)
-3. ros2 launch aruco_ros tf_publisher_launch.py
+1. 'ros2 run rviz2 rviz2'
+2. 'ros2 run diplmova_prace tf_broadcast.py' (broadcasts static marker, body and camera positions)
+3. 'ros2 launch aruco_ros tf_publisher_launch.py'
 4. Run your prefered camera node with correct output topics
 
 ## KNOWN BUGS
