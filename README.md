@@ -11,4 +11,4 @@ This project is based on aruco_ros library by pal-robotics (version humble-devel
 
 Keep in mind that for this project to run it is required to have openCV v4.2.0 installed on your computer. You can install the library from [here](https://github.com/opencv/opencv/releases/tag/4.2.0)
 
-Keep in mind that this node listens for the camera input topic at '/image_raw' and camera calibration information at '/camera_info'
+Please make sure that camera input broadcasts data to '/image_raw' topic and camera calibration information to '/camera_info' topic
