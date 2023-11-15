@@ -22,4 +22,3 @@ Please make sure that camera input broadcasts data to '/image_raw' topic and cam
 
 ## KNOWN BUGS
 1. Low framerate when marker detected
-2. Final transformation does not have the right rotation angle
