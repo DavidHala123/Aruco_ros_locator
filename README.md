@@ -9,6 +9,6 @@ This project is based on aruco_ros library by pal-robotics (version humble-devel
 + Add tf_publisher.cpp from this repository to your_ros_workspace/src/aruco_ros-humble-devel/aruco_ros/src
 + Add tf_publisher.cpp from this repository to your_ros_workspace/src/aruco_ros-humble-devel/aruco_ros/launch
 
-Keep in mind that for this project to run it is required to have openCV v4.2.0 installed on your computer. You can install the library from [here](https://www.google.com](https://github.com/opencv/opencv/releases/tag/4.2.0)https://github.com/opencv/opencv/releases/tag/4.2.0)
+Keep in mind that for this project to run it is required to have openCV v4.2.0 installed on your computer. You can install the library from [here](https://github.com/opencv/opencv/releases/tag/4.2.0)
 
 It is also required for the camera input node to broadcast the data to '/image_raw' and camera calibration information to '/camera_info'
