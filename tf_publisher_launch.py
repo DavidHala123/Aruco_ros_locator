@@ -43,18 +43,18 @@ def generate_launch_description():
 
 
     marker_frame_arg = DeclareLaunchArgument(
-        'marker_frame', default_value='camera',
+        'marker_frame', default_value='Id',
         description='Frame in which the marker pose will be refered. '
     )
 
     reference_frame_arg = DeclareLaunchArgument(
-        'reference_frame', default_value='',
+        'reference_frame', default_value='map',
         description='Reference frame. '
         'Leave it empty and the pose will be published wrt param parent_name. '
     )
 
     camera_frame_arg = DeclareLaunchArgument(
-        'camera_frame', default_value='camera_frame',
+        'camera_frame', default_value='camera',
         description='Camera frame. '
     )
 
@@ -74,7 +74,6 @@ def generate_launch_description():
     ld.add_action(reference_frame_arg)
     ld.add_action(camera_frame_arg)
     ld.add_action(corner_refinement_arg)
-    #ld.add_action(detection_mode_arg)
 
     
     ld.add_action(OpaqueFunction(function=launch_setup))
