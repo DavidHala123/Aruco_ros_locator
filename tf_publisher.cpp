@@ -258,7 +258,15 @@ public:
                 tf2::Transform transform = aruco_ros::arucoMarker2Tf2(markers[i]);
                 tf2::Stamped<tf2::Transform> cameraToReference;
                 cameraToReference.setIdentity();
-                reference_frame = "Id" + std::to_string(markers[i].id);
+                //reference_frame = "Id" + std::to_string(markers[i].id);
+                this->marker_frame = "Id" + std::to_string(markers[i].id);
+
+                geometry_msgs::msg::TransformStamped stampedTransform;
+                stampedTransform.header.frame_id = marker_frame;
+                stampedTransform.header.stamp = curr_stamp;
+                stampedTransform.child_frame_id = camera_frame;
+                tf2::toMsg(transform, stampedTransform.transform);
+                tf_broadcaster_->sendTransform(stampedTransform);
 
                 if (reference_frame != camera_frame) {
                   geometry_msgs::msg::TransformStamped transform_stamped;
@@ -270,12 +278,6 @@ public:
                   static_cast<tf2::Transform>(rightToLeft) *
                   transform;
 
-                geometry_msgs::msg::TransformStamped stampedTransform;
-                stampedTransform.header.frame_id = reference_frame;
-                stampedTransform.header.stamp = curr_stamp;
-                stampedTransform.child_frame_id = marker_frame;
-                tf2::toMsg(transform, stampedTransform.transform);
-                tf_broadcaster_->sendTransform(stampedTransform);
                 geometry_msgs::msg::PoseStamped poseMsg;
                 poseMsg.header = stampedTransform.header;
                 tf2::toMsg(transform, poseMsg.pose);
@@ -337,16 +339,6 @@ public:
       cam_info_received = true;
     }
   }
-
-//  void reconf_callback(aruco_ros::ArucoThresholdConfig & config, uint32_t level)
-//  {
-//    mDetector.setDetectionMode(
-//      aruco::DetectionMode(config.detection_mode),
-//      config.min_image_size);
-//    if (config.normalizeImage) {
-//      RCLCPP_WARN("normalizeImageIllumination is unimplemented!");
-//    }
-//  }
 };
 
 int main(int argc, char ** argv)
