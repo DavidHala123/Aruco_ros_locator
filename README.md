@@ -1,4 +1,4 @@
-![rosgraph](https://github.com/DavidHala123/Aruco_ros_locater/assets/78861269/ac68c29a-6ac8-4eb7-b0c7-79495d76db0b)# About aruco_ros_locater
+# About aruco_ros_locater
 This project is in stage of ongoing development as part of master thesis regarding robot localization using aruco_ros library.
 
 ## Important information
@@ -23,8 +23,7 @@ Please make sure that camera input broadcasts data to '/image_raw' topic and cam
 
 ## RQT_GRAPH
 
-
-
+![rosgraph](https://github.com/DavidHala123/Aruco_ros_locater/assets/78861269/ac68c29a-6ac8-4eb7-b0c7-79495d76db0b)
 
 ## KNOWN BUGS
 1. Low framerate when marker detected
