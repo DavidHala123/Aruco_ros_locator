@@ -7,6 +7,7 @@ from launch_ros.actions import Node
 def launch_setup(context, *args, **kwargs):
 
     aruco_locator_params = {
+        'broadcast_tf': True,
         'reference_frame': LaunchConfiguration('reference_frame'),
         'camera_frame': LaunchConfiguration('camera_frame'),
         'child_frame': LaunchConfiguration('child_frame'),
@@ -41,7 +42,7 @@ def generate_launch_description():
     )
 
     mode_arg = DeclareLaunchArgument(
-        'mode', default_value='NEAREST',
+        'mode', default_value='AVERAGE',
         description='Mode of final pose calculation (NEAREST / AVERAGE). '
     )
 
