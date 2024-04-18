@@ -1,4 +1,4 @@
-# About aruco_ros_locater
+# About aruco_ros_locator
 This project is in stage of ongoing development as part of master thesis regarding robot localization using aruco_ros library.
 
 ## Important information
