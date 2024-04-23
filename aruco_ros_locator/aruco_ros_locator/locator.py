@@ -1,7 +1,5 @@
 import math
 import ast
-from geometry_msgs.msg import Twist
-
 import asyncio
 
 import rclpy
@@ -15,6 +13,7 @@ from tf2_ros import TransformBroadcaster, TransformListener, Buffer, TransformEx
 from aruco_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import PoseWithCovariance, PoseWithCovarianceStamped, TransformStamped, Vector3, Pose
 
+
 import numpy as np
 
 
@@ -22,7 +21,7 @@ import numpy as np
 class Locator(Node):
 
     def __init__(self):
-        super().__init__('tf_subscriber')
+        super().__init__('locator')
         self.declare_parameter('broadcast_tf', True)
         self.declare_parameter("reference_frame", "map")
         self.declare_parameter("camera_frame", "camera")
@@ -81,6 +80,8 @@ class Locator(Node):
 
         if toFrame == "":
             _toFrame = self.camera_frame
+        else:
+            _toFrame = toFrame
         
         if calculate_to_cam or self.child_frame == "":
             _toFrame_ret = self.camera_frame
@@ -98,7 +99,7 @@ class Locator(Node):
         _t.header.frame_id = _fromFrame
         _t.transform.translation = Vector3(x=marker_pose.position.x, y=marker_pose.position.y, z=marker_pose.position.z)
         _t.transform.rotation = marker_pose.orientation
-
+        _t = self.rotateTVec(_t)
         if propagate_tf:
             self.tf_broadcast.sendTransform(_t)
         else:
@@ -150,19 +151,43 @@ class Locator(Node):
 
         return _t
     
-    async def lookup_transform_async(self, t: TransformStamped, fromFrame, toFrame):
-        getTransform_future = self.tf_buffer.wait_for_transform_async(fromFrame, toFrame, rclpy.time.Time(nanoseconds=0))
+    async def lookup_transform_async(self, t: TransformStamped, fromFrame, toFrame) -> TransformStamped:
+        getTransform_future = self.tf_buffer.wait_for_transform_async(fromFrame, self.camera_frame, rclpy.time.Time(nanoseconds=0))
         asyncio.wait_for(getTransform_future, timeout=1.0)
-
         if getTransform_future.done():
             try:
                 t = self.tf_buffer.lookup_transform(fromFrame, toFrame, rclpy.time.Time())
             except TransformException as ex:
                 self.get_logger().info(f'Could not transform from {fromFrame} to {toFrame}: {ex}')
-            self.get_logger().info(t.header.frame_id)
-            self.get_logger().info(t.child_frame_id)
-            return t
-            
+
+        return t
+    
+    def rotateTVec(self, t: TransformStamped) -> TransformStamped:
+        trans = np.array([t.transform.translation.x, t.transform.translation.y, t.transform.translation.z])
+        quat = t.transform.rotation
+        xx = quat.x * quat.x
+        yy = quat.y * quat.y
+        zz = quat.z * quat.z
+        xy = quat.x * quat.y
+        xz = quat.x * quat.z
+        yz = quat.y * quat.z
+        wx = quat.w * quat.x
+        wy = quat.w * quat.y
+        wz = quat.w * quat.z
+        ww = quat.w * quat.w
+        
+        rotation_matrix = np.array([[1 - 2 * (yy + zz), 2 * (xy - wz), 2 * (xz + wy)],
+                            [2 * (xy + wz), 1 - 2 * (xx + zz), 2 * (yz - wx)],
+                            [2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy)]])
+        
+        rotated_Tvec = np.dot(rotation_matrix, trans)
+        t.transform.translation.x = -rotated_Tvec[0]
+        t.transform.translation.y = -rotated_Tvec[1]
+        t.transform.translation.z = -rotated_Tvec[2]
+
+
+        
+        return t
 
 
 
@@ -174,6 +199,7 @@ class Locator(Node):
         t.header.frame_id = self.ref_frame
 
         if len(msg.markers) == 1:
+
             self.marker_frame = "Id" + str(msg.markers[0].id)
             t = await self.get_transform_from__marker_pose(msg.markers[0].pose.pose)
 
@@ -186,6 +212,7 @@ class Locator(Node):
                     poseO = marker.pose.pose
 
             t = await self.get_transform_from__marker_pose(poseO)
+
 
 
         elif self.mode == "AVERAGE":
@@ -208,11 +235,11 @@ class Locator(Node):
             if not self.child_frame == "":
                 t = await self.lookup_transform_async(t, self.ref_frame, self.child_frame)
 
+
             
         else:
             self.get_logger().error(f"Mode '{self.mode}' doesnt exist!")
-
-
+        
         oMsg = PoseWithCovarianceStamped()
         oMsg.header.stamp = t.header.stamp
         oMsg.header.frame_id = t.header.frame_id
