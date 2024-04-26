@@ -98,7 +98,10 @@ class Locator(Node):
         _t.child_frame_id = _toFrame
         _t.header.frame_id = _fromFrame
         _t.transform.translation = Vector3(x=marker_pose.position.x, y=marker_pose.position.y, z=marker_pose.position.z)
-        _t.transform.rotation = marker_pose.orientation
+        _t.transform.rotation.x = -marker_pose.orientation.x
+        _t.transform.rotation.y = -marker_pose.orientation.y
+        _t.transform.rotation.z = -marker_pose.orientation.z
+        _t.transform.rotation.w = marker_pose.orientation.w
         _t = self.rotateTVec(_t)
         if propagate_tf:
             self.tf_broadcast.sendTransform(_t)
