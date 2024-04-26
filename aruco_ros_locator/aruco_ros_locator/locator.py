@@ -56,10 +56,6 @@ class Locator(Node):
         self.marker_listener = self.create_subscription(MarkerArray, '/marker_publisher/markers', self.markerListener_callback, 10)
         self.marker_listener
 
-
-    def read_transform():
-        return 5
-
     async def get_transform_from__marker_pose(self, marker_pose: Pose, calculate_to_cam=False, override_broadcast_tf=False, fromFrame="", toFrame="") -> TransformStamped:
         #This function is suposed to take pose from aruco_msgs Marker message, propagate 
         #transform to the TF tree and calculate the pose of camera/child frame in regards to the reference frame
