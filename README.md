@@ -12,4 +12,5 @@ Please make sure that camera input broadcasts data to '/image_raw' topic and cam
 
 ## RQT_GRAPH
 
-//![rosgraph](https://github.com/DavidHala123/Aruco_ros_locater/assets/78861269/ac68c29a-6ac8-4eb7-b0c7-79495d76db0b)
+//![rosgraph](https://github.com/DavidHala123/Aruco_ros_locator/assets/78861269/bc95afa2-1207-4c78-9f66-d78489a36397)
+
