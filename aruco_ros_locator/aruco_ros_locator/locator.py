@@ -51,6 +51,9 @@ class Locator(Node):
         self.get_logger().info(f"Aruco ros locator node was started with arguments:")
         self.get_logger().info(f"Mode: '{self.mode}'")
         self.get_logger().info(f"broadcast tf?: '{self.broadcast_tf}'")
+        self.get_logger().info(f"reference frame: '{self.ref_frame}'")
+        self.get_logger().info(f"camera frame: '{self.camera_frame}'")
+        self.get_logger().info(f"child frame: '{self.child_frame}'")
 
 
         self.A = np.eye(7,7)
