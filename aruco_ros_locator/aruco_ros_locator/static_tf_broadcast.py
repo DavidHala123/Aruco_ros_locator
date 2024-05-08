@@ -5,26 +5,48 @@ from tf2_ros import StaticTransformBroadcaster
 from geometry_msgs.msg import TransformStamped, Vector3, Quaternion
 import math
 import numpy as np
+import time
 
 class static_tf_broadcast(Node):
 
     def __init__(self):
         super().__init__('static_tf_broadcast')
+        self.declare_parameter('resend_when_subs_changed', True)
         self.declare_parameter('setup_file_path', "")
-        self.declare_parameter('file_has_child_frame', False)
         self.declare_parameter("ref_frame_name", "map")
-        self.declare_parameter('cam_frame_name', "camera")
         
+        self.resend_when_subs_changed = self.get_parameter('resend_when_subs_changed').value
         self.path = self.get_parameter('setup_file_path').value
         self.ref_frame = self.get_parameter('ref_frame_name').value
-        self.cam_frame = self.get_parameter('cam_frame_name').value
-        self.file_has_child_frame = self.get_parameter('file_has_child_frame').value
 
+        self.tArray = []
         self.tf_broadcast = StaticTransformBroadcaster(self)
         self.get_logger().info(f"Populating tf tree:")
 
         self.populate_tree()
 
+        if self.resend_when_subs_changed:
+            self.get_logger().info("Transforms will be resent if subscriber count increases")
+            self.old_subsCt = self.tf_broadcast.pub_tf.get_subscription_count()
+            self.timer = self.create_timer(2, self.resend_tf)
+
+
+
+
+
+    def resend_tf(self):
+        subs = self.tf_broadcast.pub_tf.get_subscription_count()
+        
+        if subs > self.old_subsCt:
+            for t in self.tArray:
+                self.tf_broadcast.sendTransform(t)
+                self.get_logger().info(f"Resent transform of frame '{t.child_frame_id}' connected to '{t.header.frame_id}' frame")
+                time.sleep(0.2)
+
+            self.old_subsCt = subs
+
+        elif subs < self.old_subsCt:
+            self.old_subsCt = subs
 
     def quaternion_from_euler(self, ai, aj, ak):
         ai /= 2.0
@@ -63,29 +85,12 @@ class static_tf_broadcast(Node):
         t.transform.translation = Vector3(x = float(pose[1]), y = float(pose[2]), z = float(pose[3]))
         t.transform.rotation = Quaternion(x = quat[0], y = quat[1], z = quat[2], w = quat[3])
         self.tf_broadcast.sendTransform(t)
-        self.get_logger().info(f"Created transform of frame '{t.child_frame_id}' connected to '{t.header.frame_id}' frame")
 
-
-    def create_cam_frame(self, pose):
+        if self.resend_when_subs_changed:
+            self.tArray.append(t)
         
-        t = TransformStamped()
-        self.get_logger().info("CREATING CAM")
-        t.header.stamp = self.get_clock().now().to_msg()
-
-        if self.file_has_child_frame:
-            
-            t.header.frame_id = self.cam_frame
-            t.child_frame_id = pose[0]
-            quat = self.quaternion_from_euler(float(pose[4]), float(pose[5]), float(pose[6]))
-            t.transform.translation = Vector3(x = float(pose[1]), y = float(pose[2]), z = float(pose[3]))
-            t.transform.rotation = Quaternion(x = quat[0], y = quat[1], z = quat[2], w = quat[3])
-        else:
-            t.child_frame_id = self.cam_frame
-            t.transform.translation = Vector3(x = 0.0, y = 0.0, z = 0.0)
-            t.transform.rotation = Quaternion(x = 0.0, y = 0.0, z = 0.0, w = 0.0) 
-
-        self.tf_broadcast.sendTransform(t)
         self.get_logger().info(f"Created transform of frame '{t.child_frame_id}' connected to '{t.header.frame_id}' frame")
+
 
         
 
@@ -96,13 +101,8 @@ class static_tf_broadcast(Node):
                 pose = line.split()
 
                 if len(pose) == 7:
-                    if line_nr == 1:
-                        self.create_cam_frame(pose)
-                        
-                        if not self.file_has_child_frame:
-                            self.sendTransform(pose, line_nr)
-                    else:
-                        self.sendTransform(pose, line_nr)
+                    self.sendTransform(pose, line_nr)
+                    time.sleep(0.2)
 
                 else:
                     self.get_logger().error(f"File has wrong formatting on line: {line_nr}")
