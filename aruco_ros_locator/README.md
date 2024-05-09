@@ -14,7 +14,35 @@ This library was developed and tested with following libraries: [aruco_ros](http
 
 ## HOW TO USE
 This project consists of 3 nodes. 
-# Node 1
+
+--->locator<---
++ Specify 'broadcast_tf' (if camera node is to be broadcasted to /tf)
++ Specify reference and camera frame
++ Specify child frame (if empty, tf will be calculated from ref_frame to cam_frame)
++ Specify 'mode' of localization
++ Specify covariance matrix
++ Launch locator
+
+--->static_tf_broadcaster<---
+The essence of this node is to populate tf tree.
++ Create setup file - [example](https://github.com/DavidHala123/Aruco_ros_locator/blob/main/aruco_ros_locator/data/setup.txt)
++ + "name" "Tx" "Ty" "Tz" "Rx" "Ry" "Rz" 
++ Specify 'resend_when_subs_changed' (if True, static tf will be resent if subscribers count increases)
++ Launch static_tf_subscriber
+
+--->Accuracy_meas<---
+The essence of this node is the calculation of statistical variables that make it easier to calculate the covariance matrix and other variables. The output of this node contains std, RMSE and worksheet with all the measured values to process the eigenvariables.
++ Record all the measurements with ros_bag
++ Create a folder that contains all the rosbag files. All bag files in created folder must be sorted into folders whose names correspond to the measurement distances
++ Specify the root folder (with rosbag files) in launch file
++ Specify the 'folders_corresponds_to_axis' variable (specifies which axis corresponds to the name of folders with bagfiles)
++ Specify real values for x, y, z, Rx, Ry, Rz (you can leave the 'folders_corresponds_to_axis' axis empty, other empty axes will be considered 0)
++ Specify camera info path (calibration file) ->Added due to incosistency with accepting cam_info from rosbag file<-
++ Specify ref, camera frame in locator (if you are measuring distance from marker, use marker frame name as reference)
++ Populate tree (for instance static_tf_broadcaster)
++ Run marker_detector (aruco_ros)
++ Run locator (aruco_ros_locator)
++ Launch accuracy_meas
 
 ## RQT_GRAPH
 
