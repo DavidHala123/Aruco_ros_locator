@@ -12,7 +12,7 @@ Please make sure that camera input broadcasts data to '/image_raw' topic and cam
 
 This library was developed and tested with following libraries: [aruco_ros](https://github.com/pal-robotics/aruco_ros), [usb_cam](https://github.com/ros-drivers/usb_cam), [image_pipeline](https://github.com/ros-perception/image_pipeline)
 
-## HOW TO USE
+## ----HOW TO USE----
 
 # locator
 
@@ -47,6 +47,6 @@ The essence of this node is the calculation of statistical variables that make i
 + Run locator (aruco_ros_locator)
 + Launch accuracy_meas
 
-## RQT_GRAPH
+## ----RQT_GRAPH----
 
 ![rosgraph](https://github.com/DavidHala123/Aruco_ros_locator/assets/78861269/bc95afa2-1207-4c78-9f66-d78489a36397)
