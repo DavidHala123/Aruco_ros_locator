@@ -56,13 +56,6 @@ class Locator(Node):
         self.get_logger().info(f"child frame: '{self.child_frame}'")
 
 
-        self.A = np.eye(7,7)
-        self.H = np.eye(7,7)
-        self.R = self.cov_matrix
-        self.P0 = self.cov_matrix
-        self.Q = 0.0001 * np.eye(7,7)
-        self.x0_kalm = 0
-
 
         self.marker_frame = ""
         self.tf_buffer = Buffer()
@@ -242,9 +235,12 @@ class Locator(Node):
                 zAvg += tMarker.transform.translation.z
                 qArray.append(tMarker.transform.rotation)
    
-            self.make_average(xAvg, yAvg, zAvg, qArray, t)
+            t = self.make_average(xAvg, yAvg, zAvg, qArray, t)
+
             if self.broadcast_tf:
                 self.tf_broadcast.sendTransform(t)
+            else:
+                self.tf_buffer.set_transform(t, 'default_authority')
 
             if not self.child_frame == "":
                 t = await self.lookup_transform_async(t, self.ref_frame, self.child_frame)
