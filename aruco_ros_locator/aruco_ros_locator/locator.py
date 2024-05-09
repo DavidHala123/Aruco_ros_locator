@@ -66,7 +66,8 @@ class Locator(Node):
         self.marker_listener = self.create_subscription(MarkerArray, self.inMarkerTopic, self.markerListener_callback, 10)
         self.marker_listener
 
-    async def get_transform_from__marker_pose(self, marker_pose: Pose, calculate_to_cam=False, override_broadcast_tf=False, fromFrame="", toFrame="") -> TransformStamped:
+
+    def get_transform_from__marker_pose(self, marker_pose: Pose, calculate_to_cam=False, override_broadcast_tf=False) -> TransformStamped:
         #This function is suposed to take pose from aruco_msgs Marker message, propagate 
         #transform to the TF tree and calculate the pose of camera/child frame in regards to the reference frame
 
@@ -84,25 +85,13 @@ class Locator(Node):
         else:
             propagate_tf = self.broadcast_tf
 
-        if toFrame == "":
-            _toFrame = self.camera_frame
-        else:
-            _toFrame = toFrame
-        
         if calculate_to_cam or self.child_frame == "":
             _toFrame_ret = self.camera_frame
         else:
             _toFrame_ret = self.child_frame
 
-        if fromFrame == "":
-            _fromFrame = self.marker_frame
-            _fromFrame_ret = self.ref_frame
-        else:
-            _fromFrame = self.marker_frame
-            _fromFrame_ret = fromFrame
-
-        _t.child_frame_id = _toFrame
-        _t.header.frame_id = _fromFrame
+        _t.child_frame_id = self.camera_frame
+        _t.header.frame_id = self.marker_frame
         _t.transform.translation = Vector3(x=marker_pose.position.x, y=marker_pose.position.y, z=marker_pose.position.z)
         _t.transform.rotation.x = -marker_pose.orientation.x
         _t.transform.rotation.y = -marker_pose.orientation.y
@@ -116,14 +105,7 @@ class Locator(Node):
 
 
         #RETRIEVE TRANSFORM TO REF_FRAME
-        getTransform_future = self.tf_buffer.wait_for_transform_async(_fromFrame_ret, _toFrame_ret, rclpy.time.Time(nanoseconds=0))
-        asyncio.wait_for(getTransform_future, timeout=1.0)
-
-        if getTransform_future.done():
-            try:
-                _t = self.tf_buffer.lookup_transform(_fromFrame_ret, _toFrame_ret, rclpy.time.Time())
-            except TransformException as ex:
-                self.get_logger().info(f'Could not transform from {_fromFrame_ret} to {_toFrame_ret}: {ex}')
+        _t = self.lookup_transform_async(_t, self.ref_frame, _toFrame_ret)
 
         return _t
 
@@ -160,9 +142,10 @@ class Locator(Node):
 
         return _t
     
-    async def lookup_transform_async(self, t: TransformStamped, fromFrame, toFrame) -> TransformStamped:
+
+    def lookup_transform_async(self, t: TransformStamped, fromFrame, toFrame) -> TransformStamped:
         getTransform_future = self.tf_buffer.wait_for_transform_async(fromFrame, self.camera_frame, rclpy.time.Time(nanoseconds=0))
-        asyncio.wait_for(getTransform_future, timeout=1.0)
+        #asyncio.wait_for(getTransform_future, timeout=1.0)
         if getTransform_future.done():
             try:
                 t = self.tf_buffer.lookup_transform(fromFrame, toFrame, rclpy.time.Time())
@@ -171,6 +154,7 @@ class Locator(Node):
 
         return t
     
+
     def rotateTVec(self, t: TransformStamped) -> TransformStamped:
         trans = np.array([t.transform.translation.x, t.transform.translation.y, t.transform.translation.z])
         quat = t.transform.rotation
@@ -209,7 +193,7 @@ class Locator(Node):
         if len(msg.markers) == 1:
 
             self.marker_frame = str(msg.markers[0].id)
-            t = await self.get_transform_from__marker_pose(msg.markers[0].pose.pose)
+            t = self.get_transform_from__marker_pose(msg.markers[0].pose.pose)
 
         elif self.mode == "NEAREST": 
             closestZ = 100.0
@@ -219,7 +203,7 @@ class Locator(Node):
                     closestZ = marker.pose.pose.position.z
                     poseO = marker.pose.pose
 
-            t = await self.get_transform_from__marker_pose(poseO)
+            t = self.get_transform_from__marker_pose(poseO)
 
 
         elif self.mode == "AVERAGE":
@@ -229,7 +213,7 @@ class Locator(Node):
             zAvg = 0
             for marker in msg.markers:
                 self.marker_frame = str(marker.id)
-                tMarker = await self.get_transform_from__marker_pose(marker.pose.pose, True, True)
+                tMarker = self.get_transform_from__marker_pose(marker.pose.pose, True, True)
                 xAvg += tMarker.transform.translation.x
                 yAvg += tMarker.transform.translation.y
                 zAvg += tMarker.transform.translation.z
@@ -243,7 +227,7 @@ class Locator(Node):
                 self.tf_buffer.set_transform(t, 'default_authority')
 
             if not self.child_frame == "":
-                t = await self.lookup_transform_async(t, self.ref_frame, self.child_frame)
+                t = self.lookup_transform_async(t, self.ref_frame, self.child_frame)
 
         else:
             self.get_logger().error(f"Mode '{self.mode}' doesnt exist!")
