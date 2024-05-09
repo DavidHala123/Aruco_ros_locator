@@ -1,5 +1,5 @@
 # About aruco_ros_locator
-This project is in stage of ongoing development as part of master thesis regarding robot localization using aruco_ros library.
+This project was created under the auspices of [BUT FEKT](https://www.vut.cz/) as part of the master thesis regarding robot localization using aruco_ros library.
 
 ## Important information
 This project is based on aruco_ros library by pal-robotics (version humble-devel). In order to run this code it is necessary to follow theese steps:
