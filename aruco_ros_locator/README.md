@@ -13,9 +13,10 @@ Please make sure that camera input broadcasts data to '/image_raw' topic and cam
 This library was developed and tested with following libraries: [aruco_ros](https://github.com/pal-robotics/aruco_ros), [usb_cam](https://github.com/ros-drivers/usb_cam), [image_pipeline](https://github.com/ros-perception/image_pipeline)
 
 ## HOW TO USE
-This project consists of 3 nodes. 
 
 --->locator<---
+
+Main node that returns transform between ref_frame and cam_frame/child_frame
 + Specify 'broadcast_tf' (if camera node is to be broadcasted to /tf)
 + Specify reference and camera frame
 + Specify child frame (if empty, tf will be calculated from ref_frame to cam_frame)
@@ -24,6 +25,7 @@ This project consists of 3 nodes.
 + Launch locator
 
 --->static_tf_broadcaster<---
+
 The essence of this node is to populate tf tree.
 + Create setup file - [example](https://github.com/DavidHala123/Aruco_ros_locator/blob/main/aruco_ros_locator/data/setup.txt)
 + + "name" "Tx" "Ty" "Tz" "Rx" "Ry" "Rz" 
@@ -31,6 +33,7 @@ The essence of this node is to populate tf tree.
 + Launch static_tf_subscriber
 
 --->Accuracy_meas<---
+
 The essence of this node is the calculation of statistical variables that make it easier to calculate the covariance matrix and other variables. The output of this node contains std, RMSE and worksheet with all the measured values to process the eigenvariables.
 + Record all the measurements with ros_bag
 + Create a folder that contains all the rosbag files. All bag files in created folder must be sorted into folders whose names correspond to the measurement distances
