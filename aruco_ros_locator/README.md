@@ -29,7 +29,7 @@ Main node that returns transform between ref_frame and cam_frame/child_frame
 
 The essence of this node is to populate tf tree.
 + Create setup file - [example](https://github.com/DavidHala123/Aruco_ros_locator/blob/main/aruco_ros_locator/data/setup.txt)
-+ + "name" "Tx" "Ty" "Tz" "Rx" "Ry" "Rz" 
+  + "name" "Tx" "Ty" "Tz" "Rx" "Ry" "Rz" 
 + Specify 'resend_when_subs_changed' (if True, static tf will be resent if subscribers count increases)
 + Launch static_tf_subscriber
 
