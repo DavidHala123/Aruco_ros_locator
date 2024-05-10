@@ -8,7 +8,7 @@ import rclpy.duration
 from rclpy.node import Node
 
 import rclpy.time
-from tf2_ros import TransformBroadcaster, TransformListener, Buffer, TransformException
+from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster, TransformListener, Buffer, TransformException
 
 from aruco_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import PoseWithCovariance, PoseWithCovarianceStamped, TransformStamped, Vector3, Pose
@@ -26,6 +26,7 @@ class Locator(Node):
         self.declare_parameter('input_topic', "/marker_publisher/markers")
         self.declare_parameter('output_topic', "/aruco_ros_locator/pose")
         self.declare_parameter('broadcast_tf', True)
+        self.declare_parameter('create_frame_if_collide', True)
         self.declare_parameter("reference_frame", "map")
         self.declare_parameter("camera_frame", "camera")
         self.declare_parameter("child_frame", "body")
@@ -47,6 +48,7 @@ class Locator(Node):
         self.cov_matrix = ast.literal_eval(self.cov_matrix)
         self.outTopic = self.get_parameter("output_topic").value
         self.inMarkerTopic = self.get_parameter("input_topic").value
+        self.cfic = self.get_parameter("create_frame_if_collide").value
 
         self.get_logger().info(f"Aruco ros locator node was started with arguments:")
         self.get_logger().info(f"Mode: '{self.mode}'")
@@ -56,15 +58,30 @@ class Locator(Node):
         self.get_logger().info(f"child frame: '{self.child_frame}'")
 
 
-
         self.marker_frame = ""
         self.tf_buffer = Buffer()
         self.tf_listener = TransformListener(self.tf_buffer, self)
         if self.broadcast_tf:
             self.tf_broadcast = TransformBroadcaster(self)
+
+        if self.cfic and not self.broadcast_tf and self.tf_buffer.can_transform(self.camera_frame, self.ref_frame, rclpy.time.Time()):
+            
+            self.statTf_broadcast = StaticTransformBroadcaster(self)
+            
+            if not self.child_frame == "":
+                t_stat = self.tf_buffer.lookup_transform(self.child_frame, self.camera_frame, rclpy.time.Time())
+                t_stat.child_frame_id += "_aruco"
+                t_stat.header.frame_id += "_aruco"
+                self.child_frame += "_aruco"
+                self.statTf_broadcast.sendTransform(t_stat)
+
+            self.camera_frame += "_aruco"
+        
         self.final_pose_pub = self.create_publisher(PoseWithCovarianceStamped, self.outTopic, 10)
         self.marker_listener = self.create_subscription(MarkerArray, self.inMarkerTopic, self.markerListener_callback, 10)
         self.marker_listener
+
+
 
 
     async def get_transform_from__marker_pose(self, marker_pose: Pose, calculate_to_cam=False, override_broadcast_tf=False) -> TransformStamped:
@@ -102,6 +119,7 @@ class Locator(Node):
             self.tf_broadcast.sendTransform(_t)
         else:
             self.tf_buffer.set_transform(_t, 'default_authority')
+
 
 
         #RETRIEVE TRANSFORM TO REF_FRAME
