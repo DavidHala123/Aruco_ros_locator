@@ -8,6 +8,7 @@ def launch_setup(context, *args, **kwargs):
 
     aruco_locator_params = {
         'broadcast_tf': False,
+        'create_frame_if_collide': False,
         'reference_frame': LaunchConfiguration('reference_frame'),
         'camera_frame': LaunchConfiguration('camera_frame'),
         'child_frame': LaunchConfiguration('child_frame'),
@@ -39,7 +40,7 @@ def generate_launch_description():
     )
 
     child_fram_arg = DeclareLaunchArgument(
-        'child_frame', default_value='',
+        'child_frame', default_value='body',
         description='Leave empty if TF is suposed to be computed towards camera. '
     )
 
