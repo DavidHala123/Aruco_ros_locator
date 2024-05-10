@@ -49,8 +49,8 @@ The essence of this node is the calculation of statistical variables that make i
 
 
 ## ----IMPLEMENTING LOCATOR NODE WITH LOCALIZATION SYSTEMS IN USE----
-+ If your implementation already uses localization system which broadcasts to /tf and you dont want to broadcast this transform just yet. You can disable this functionality in launch file with "broadcast_tf".
-+ If "broadcast_tf" is disabled and your other localization system already populates tf tree with frames you want to locate with this node, set the "create_frame_if_collide" in your launch file to true. It creates copy of colliding frame or frames if you are using both camera and child frame.
++ If your implementation already uses localization system which broadcasts to /tf and you dont want to broadcast this nodes transform just yet, you can disable this functionality in launch file through variable "broadcast_tf".
++ If "broadcast_tf" is disabled and frames that are supposed to be located by this node are already created and located by your other node, set "create_frame_if_collide" to true.
 
 ## ----RQT_GRAPH----
 
