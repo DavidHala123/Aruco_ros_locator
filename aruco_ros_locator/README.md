@@ -18,6 +18,7 @@ This library was developed and tested with following libraries: [aruco_ros](http
 
 Main node that returns transform between ref_frame and cam_frame/child_frame
 + Specify 'broadcast_tf' (if camera node is to be broadcasted to /tf)
++ Specify 'create_frame_if_collide' (creates copy of frames only if tf is not broadcasted and frames already exists)
 + Specify reference and camera frame
 + Specify child frame (if empty, tf will be calculated from ref_frame to cam_frame)
 + Specify 'mode' of localization
@@ -48,9 +49,9 @@ The essence of this node is the calculation of statistical variables that make i
 + Launch accuracy_meas
 
 
-## ----IMPLEMENTING LOCATOR NODE WITH LOCALIZATION SYSTEMS IN USE----
+## ----IMPLEMENTING NODE WITH LOCALIZATION SYSTEMS IN USE----
 + If your implementation already uses localization system which broadcasts to /tf and you dont want to broadcast this nodes transform just yet, you can disable this functionality in launch file through variable "broadcast_tf".
-+ If "broadcast_tf" is disabled and frames that are supposed to be located by this node are already created and located by your other node, set "create_frame_if_collide" to true.
++ If "broadcast_tf" is disabled and frames that are supposed to be located by this node are its position are already broadcasted and located by other node in use, set "create_frame_if_collide" to true.
 
 ## ----RQT_GRAPH----
 
