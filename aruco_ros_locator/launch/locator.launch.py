@@ -8,7 +8,6 @@ def launch_setup(context, *args, **kwargs):
 
     aruco_locator_params = {
         'broadcast_tf': False,
-        'create_frame_if_collide': False,
         'reference_frame': LaunchConfiguration('reference_frame'),
         'camera_frame': LaunchConfiguration('camera_frame'),
         'child_frame': LaunchConfiguration('child_frame'),
